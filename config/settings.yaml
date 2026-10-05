@@ -37,7 +37,11 @@ files:
 # ------------------------------------------------------------------ pipeline parameters
 time_log:
   duration_factor: 24       # DB durations are in days -> hours (Math Formula #451)
-  well_filter_column: wellname   # keep only wells of lookups.new_design_wells
+  well_filter_column: wellname   # column compared with lookups.new_design_wells
+  # include = keep the listed wells | exclude = keep all OTHER wells.
+  # KNIME node #412 is configured as "Exclude TRUE matches" => the workflow processes the wells
+  # that are NOT in the list (confirmed by the user), hence `exclude`.
+  well_filter_mode: exclude
 
 start_end:                  # sub-workflow "START / END": re-compute start & end time of day
   enabled: true

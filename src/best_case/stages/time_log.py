@@ -17,10 +17,14 @@ def prepare_time_log(raw: pd.DataFrame, cfg) -> tuple[pd.DataFrame, pd.DataFrame
     tl = duplicate_row_filter(raw, None, selection="FIRST")  # exact duplicate rows (#413)
     col = cfg.get("time_log.well_filter_column", "wellname")
     wells = list(cfg.lookups["new_design_wells"])
+    mode = str(cfg.get("time_log.well_filter_mode", "include")).lower()
+    if mode not in ("include", "exclude"):
+        raise ValueError("time_log.well_filter_mode must be 'include' or 'exclude'")
     spec = RowFilterSpec.from_dict(
-        {"conditions": [{"column": col, "operator": "IN", "value": wells, "case_sensitive": True}]}
+        {"mode": "matching" if mode == "include" else "non_matching",
+         "conditions": [{"column": col, "operator": "IN", "value": wells, "case_sensitive": True}]}
     )
-    tl = row_filter(tl, spec)  # Rule-based Row Splitter #412 (matching output)
+    tl = row_filter(tl, spec)  # Rule-based Row Splitter #412
     well_list = distinct(tl, ["idwell", "wellname"])  # GroupBy #539
     tl = apply_steps(tl, cfg.rules["time_log_cleaning"])
     return tl, well_list

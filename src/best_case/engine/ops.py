@@ -91,6 +91,8 @@ def join(
     R = right.reset_index(drop=True)
     lk = pd.DataFrame({k: L[c] for k, c in zip(keys, left_on)})
     rk = pd.DataFrame({k: R[c] for k, c in zip(keys, right_on)})
+    for k in keys:  # keys of different dtypes (e.g. object vs datetime64) must be comparable
+        lk[k], rk[k] = _align_key_types(lk[k], rk[k])
     if not null_keys_match:
         # make missing keys unique so that they cannot match each other
         for k in keys:
@@ -101,6 +103,16 @@ def join(
     merged = lpart.merge(rpart, on=keys, how=how, sort=False)
     # restore: drop key helpers, order = left cols then right cols
     return merged[left_cols + [out_right_names[c] for c in right_cols]].reset_index(drop=True)
+
+
+def _align_key_types(a: pd.Series, b: pd.Series) -> tuple[pd.Series, pd.Series]:
+    if a.dtype == b.dtype:
+        return a, b
+    if pd.api.types.is_datetime64_any_dtype(a) or pd.api.types.is_datetime64_any_dtype(b):
+        return pd.to_datetime(a, errors="coerce"), pd.to_datetime(b, errors="coerce")
+    if pd.api.types.is_numeric_dtype(a) != pd.api.types.is_numeric_dtype(b):
+        return a.astype(object), b.astype(object)
+    return a, b
 
 
 def _sentinel_missing(s: pd.Series, tag: str) -> pd.Series:

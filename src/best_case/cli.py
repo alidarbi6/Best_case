@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+import warnings
 from pathlib import Path
 
 from .config import Config
@@ -40,6 +41,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"synthetic data written to {args.out}")
         return 0
 
+    warnings.filterwarnings("ignore", category=FutureWarning)
     cfg = Config.load(args.settings, args.overrides)
     logging.basicConfig(level=cfg.get("logging.level", "INFO"), format="%(asctime)s %(levelname)s %(message)s")
     run_pipeline(cfg, only=args.only, start_from=args.from_stage, cache_dir=args.cache_dir)

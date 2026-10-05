@@ -35,6 +35,8 @@ def build_sections(time_log: pd.DataFrame, cfg) -> pd.DataFrame:
     completed = completed_hole_sections(pairs, cfg)
     filtered = row_filter(time_log, RowFilterSpec.from_dict(cfg.require("section_filter")))  # #460
     drop = list(cfg.get("completed_sections.drop_columns", []))
+    log.info("sections: %d time-log rows, %d (code4, well) pairs, %d completed pairs, %d rows pass the section filter",
+             len(time_log), len(pairs), len(completed), len(filtered))
     sections = join(
         filtered, completed, ["wellname", "code4"], how="inner",
         left_select=Select(exclude=drop), right_select=Select(include=[]),

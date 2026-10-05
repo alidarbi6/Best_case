@@ -1,6 +1,7 @@
 # Reference lists / lookup tables.  Edit freely - nothing here is hard-coded in the code.
 
-# Wells drilled with the "new design" (workflow node: Rule-based Row Splitter #412).
+# Well list of the Rule-based Row Splitter #412.  What happens with it is decided by
+# `time_log.well_filter_mode` in settings.yaml (exclude = wells NOT in this list are processed).
 new_design_wells:
   - JR-03
   - JR-04

@@ -53,7 +53,7 @@ def tables():
 
 
 def _cfg(settings_file, tmp_path, **kw):
-    cfg = Config.load(settings_file, ["source.type=csv_dir", "queries.mode=per_table", f"export.directory={tmp_path}"])
+    cfg = Config.load(settings_file, ["source.type=csv_dir", "queries.mode=per_table", "time_log.well_filter_mode=include", f"export.directory={tmp_path}"])
     return cfg.copy_with(**kw) if kw else cfg
 
 

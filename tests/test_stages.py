@@ -139,3 +139,14 @@ def test_drilling_parameters_concatenates_components_and_drops_rows_without_dept
     assert len(out) == 1
     assert out["des_DrillstringComp"].iloc[0] == "motor, bit"  # ordered by sysseq
     assert out["length"].iloc[0] == "3.5, 3.5" and out["sysseq"].iloc[0] == "1, 2"
+
+
+def test_well_filter_mode_exclude_keeps_wells_outside_the_list(cfg):
+    from best_case.stages.time_log import prepare_time_log
+
+    raw = pd.DataFrame({"idwell": ["1", "2", "3"], "wellname": ["SPH-01", "SPH-16", None], "code1": "4", "code2": "p",
+                        "des": "x", "jobtyp": "j", "code4": "8 1/2"})
+    inc, _ = prepare_time_log(raw, cfg.copy_with(time_log__well_filter_mode="include"))
+    exc, wells = prepare_time_log(raw, cfg.copy_with(time_log__well_filter_mode="exclude"))
+    assert inc["wellname"].tolist() == ["SPH-01"]
+    assert exc["idwell"].tolist() == ["2", "3"] and wells["idwell"].tolist() == ["2", "3"]

@@ -115,6 +115,8 @@ python -m pytest -q          # ۳۳ تست؛ نیازی به دیتابیس ند
 
 ## تفاوت‌ها، فرض‌ها و موارد مبهم (لطفاً بازبینی شود)
 
+**فیلتر چاه‌ها (مهم):** نود Rule-based Row Splitter (#412) در KNIME روی «Exclude TRUE matches» است، یعنی ورک‌فلو چاه‌هایی را پردازش می‌کند که *در لیست `lookups.yaml` نیستند* (تأییدشده توسط کاربر). تنظیم: `time_log.well_filter_mode: exclude | include`.
+
 **آنچه در ورک‌فلو هست و در سند نیست** — پیاده‌سازی شده: تبدیل `duration × 24`، START/END، COMPLETED HO، سه Approach، خروجی Excel.
 
 **فرض‌هایی که از روی تنظیمات نودها استنباط شد:**
