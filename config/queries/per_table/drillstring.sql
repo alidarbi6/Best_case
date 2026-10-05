@@ -1,0 +1,19 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    bitno,
+    bittfa,
+    com,
+    des,
+    stringno,
+    wearbearing,
+    weardull,
+    weargauge,
+    wearinner,
+    wearloc,
+    wearother,
+    wearouter,
+    wearpulled
+FROM
+    dbo.wvt_wvjobdrillstring;

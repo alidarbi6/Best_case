@@ -1,0 +1,80 @@
+# Reference lists / lookup tables.  Edit freely - nothing here is hard-coded in the code.
+
+# Wells drilled with the "new design" (workflow node: Rule-based Row Splitter #412).
+new_design_wells:
+  - JR-03
+  - JR-04
+  - JR-05
+  - JR-06
+  - JR-07
+  - JR-08
+  - JR-09
+  - JR-10
+  - JR-12
+  - SPH-01
+  - SPH-01 Moving
+  - SPH-02
+  - SPH-03
+  - SPH-04
+  - SPH-05
+  - SPH-06
+  - SPH-07
+  - SPH-08
+  - SPH-09
+  - SPH-10
+  - SPH-10 Moving
+  - SPH-11
+  - SPH-12
+
+# Approach 2 ("Code1"): drilling_code1 -> activity   (Table Creator #217)
+code1_activity:
+  "4": Vertical Drilling
+  "5": Directional/Horizontal Drilling
+  "6": M/U BHA
+  "7": L/D BHA
+  "8": P/U Drill Pipe (Make Stand)
+  "9": L/D Drill Pipe
+  "10": RIH string
+  "11": POOH string
+  "12": Wash &Ream (W&R)
+  "13": Wiper/ Short/ Condition Trip
+  "14": Slow Circulation Rate (SCR)
+  "15": Circulate mud (work on mud rheology, condition Mud, Displace the well fluid/ to Comp. fluid)
+  "16": Circ. Btm's up (CBU)/ Pumping fluid or any pill
+  "17": Pumping LCM
+  "18": Flow Check
+  "20": Side-Track Operation
+  "22": Shut-In The Well
+  "24": Work On Junk/Obstruction
+  "25": Milling Operation
+  "26": Fishing Operation
+  "27": Set/Retrieve Wear Bushing
+  "28": R/U & R/D Surf. Equipment
+  "29": Pressure Test &Function Test
+  "30": Coring Operation
+  "31": Rig Service/ Repair & Meintenance
+  "32": Slip And Cut
+  "33": Multi-Shot/Single-Shot Running
+  "34": Totco Running on Wire
+  "35": MWD Survey
+  "36": Rig Up Shooting Nipple (& R/D Mouse hole)
+  "37": Logging (Wire Line, CTU)
+  "38": TLC Logging
+  "39": RIH Casing & Liner
+  "40": POOH Casing/Liner
+  "41": Run Liner Tie Back/ SN Packer
+  "42": Cementing Operation of Liner/Casing
+  "43": Wait On Cement to get hard
+  "44": Cement Top Job
+  "45": Squeeze/ Inject Cement
+  "46": Nipple Up/Down BOP or Bell nipple
+  "47": Nipple Up/Down Wellhead
+  "48": Drill-Out/Clean-Out
+
+# Approach 3 ("OPSCAT"): operation_category -> operation   (Table Creator #274)
+opscategory_operation:
+  "2": Drilling
+  "3": Logging
+  "4": Deviation survey (Totco, Single& Multi Shot,…)
+  "5": Conductor, Casing & Liner
+  "6": Cementing

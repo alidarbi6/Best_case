@@ -1,0 +1,11 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    depthdrillingbtm,
+    depthdrillingtop,
+    depthfinalsource,
+    formname,
+    layername
+FROM
+    dbo.wvt_wvwellboreformation;

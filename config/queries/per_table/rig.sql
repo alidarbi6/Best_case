@@ -1,0 +1,10 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    contractor,
+    dttmend,
+    dttmstart,
+    rigno
+FROM
+    dbo.wvt_wvjobrig;

@@ -1,0 +1,91 @@
+# Cleaning / mapping rules.  Syntax = KNIME Rule Engine / String Manipulation, so a rule
+# edited in KNIME can be pasted here as is.  Rules are evaluated top to bottom, the first
+# match wins; `TRUE => $col$` keeps the original value.
+#
+# A step is either
+#   type: expression  -> `expression:` is a String Manipulation / Math Formula expression
+#   type: rules       -> `rules:` is an ordered list of `condition => outcome`
+# and writes the result to `column` (replacing it, or creating it when it is new).
+
+# Applied to the time-log table in this order (workflow: "CODE 4 cleaning", "JOB TYPE cleaning" ...)
+time_log_cleaning:
+  - {name: code1_strip, type: expression, column: code1, expression: 'strip($code1$)'}
+  - {name: code2_strip_upper, type: expression, column: code2, expression: 'strip(upperCase($code2$))'}
+  - name: des_sidetrack
+    type: rules
+    column: des
+    rules:
+      - '$des$ LIKE "*ST*1" OR $des$ LIKE "*Sidetrack*1" OR $des$ LIKE "*sidetrack*1" => "ST #1"'
+      - 'TRUE => $des$'
+  - {name: jobtyp_normalise, type: expression, column: jobtyp, expression: 'strip(lowerCase(replaceChars($jobtyp$, "\"", "")))'}
+  - name: jobtyp_variants
+    type: rules
+    column: jobtyp
+    rules:
+      - '$jobtyp$ LIKE "mov*r/u*" => "Move & R/U"'
+      - '$jobtyp$ LIKE "drill*original*" => "Drilling - Original"'
+      - '$jobtyp$ = "move" OR $jobtyp$ = "moving" => "Moving"'
+      - '$jobtyp$ LIKE "r/d*mov*" => " R/D & Move"'
+      - 'TRUE => $jobtyp$'
+  - {name: jobtyp_capitalize, type: expression, column: jobtyp, expression: 'capitalize($jobtyp$, "/ -")'}
+  - {name: code4_normalise, type: expression, column: code4, expression: 'strip(lowerCase(replaceChars($code4$, "\"", "")))'}
+  - name: code4_hole_sections
+    type: rules
+    column: code4
+    rules:
+      - '$code4$ LIKE "*5*7/8*" => "5 7/8"'
+      - '$code4$ LIKE "*8*1/2*" => "8 1/2"'
+      - '$code4$ LIKE "*8*3/8*" => "8 3/8"'
+      - '$code4$ LIKE "*12*1/4*" => "12 1/4"'
+      - 'TRUE => $code4$'
+  - {name: code4_upper, type: expression, column: code4, expression: 'upperCase($code4$)'}
+
+# Applied to the formation table (workflow: "wellbore formation")
+formation_cleaning:
+  - {name: formname_normalise, type: expression, column: formname, expression: 'strip(lowerCase($formname$))'}
+  - name: formname_variants
+    type: rules
+    column: formname
+    rules:
+      - '$formname$ LIKE "*gachsaran*" => "gachsaran"'
+      - '$formname$ LIKE "*fah*" => "fahliyan"'
+      - '$formname$ LIKE "*gurpi*" => "gurpi"'
+      - '$formname$ LIKE "*il-*" OR $formname$ LIKE "*ilam*" => "ilam"'
+      - '$formname$ LIKE "*azadegan*" => "azadegan"'
+      - '$formname$ LIKE "*gadvan*" => "gadvan"'
+      - '$formname$ LIKE "*td*" => "TD"'
+      - 'TRUE => $formname$'
+
+# Field category of a well (Rule Engine #439) - appended as a new column.
+well_category:
+  - name: category
+    type: rules
+    column: category
+    rules:
+      - '$wellname$ LIKE "SPH*" => "SPH"'
+      - '$wellname$ LIKE "JR*" => "JR"'
+
+# Splitting a drilling-parameter row that spans two formations (nodes #545, #567, #566, #621)
+formation_split:
+  # rows kept after the cross join with the formations of the well
+  range_rules:
+    - '$depthstart$ >= $depthdrillingtop$ AND $depthstart$ <= $depthdrillingbtm$ => TRUE'
+    - '$depthend$ >= $depthdrillingtop$ AND $depthend$ <= $depthdrillingbtm$ => TRUE'
+  duplicate:
+    group_columns: [depthend, depthstart]
+    reference: depthdrillingbtm
+    selection: MINIMUM
+    flag_column: Duplicate Status
+  adjust:
+    - name: depthstart_of_duplicate
+      type: rules
+      column: depthstart
+      rules:
+        - '$Duplicate Status$ = "duplicate" => $depthdrillingtop$'
+        - 'TRUE => $depthstart$'
+    - name: depthend_of_chosen
+      type: rules
+      column: depthend
+      rules:
+        - '$Duplicate Status$ = "chosen" => $depthdrillingbtm$'
+        - 'TRUE => $depthend$'

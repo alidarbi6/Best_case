@@ -1,0 +1,15 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    com,
+    des,
+    grade,
+    hoursstart,
+    joints,
+    length,
+    make,
+    model,
+    sysseq
+FROM
+    dbo.wvt_wvjobdrillstringcomp;

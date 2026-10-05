@@ -1,0 +1,11 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    dttmend,
+    dttmstart,
+    plannextrptops,
+    rpttmactops,
+    summaryops
+FROM
+    dbo.wvt_wvjobreport;

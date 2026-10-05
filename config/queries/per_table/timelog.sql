@@ -1,0 +1,15 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    code1,
+    code2,
+    code3,
+    code4,
+    com,
+    duration,
+    idrecwellbore,
+    opscategory,
+    sysseq
+FROM
+    dbo.wvt_wvjobreporttimelog;

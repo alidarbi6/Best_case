@@ -1,0 +1,62 @@
+# Query registry.  Every query lives in its own .sql file; edit the file (or point
+# `file:` somewhere else) to change what is read from the database.  The pipeline only
+# relies on the *column names* listed under `columns:` - if you change a query keep
+# those names (use `AS`) or the loader reports exactly what is missing.
+#
+# Two interchangeable sets are provided (selected with `queries.mode` in settings.yaml):
+#   per_table : one SELECT per table, joins are done in pandas (what the KNIME workflow does)
+#   sql_join  : the join queries given in the specification document, joins done by SQL Server
+
+system:
+  databases:
+    file: system/databases.sql
+    columns: [name]
+
+datasets:
+  well_header:
+    file: per_table/well_header.sql
+    columns: [idwell, wellname]
+  job:
+    file: per_table/job.sql
+    columns: [idwell, idrec, dttmend, dttmspud, dttmstart, jobtyp]
+  rig:
+    file: per_table/rig.sql
+    columns: [idwell, idrecparent, idrec, contractor, dttmend, dttmstart, rigno]
+  report:
+    file: per_table/report.sql
+    columns: [idwell, idrecparent, idrec, dttmend, dttmstart, plannextrptops, rpttmactops, summaryops]
+  timelog:
+    file: per_table/timelog.sql
+    columns: [idwell, idrecparent, idrec, code1, code2, code3, code4, com, duration, idrecwellbore, opscategory, sysseq]
+    string_columns: [code1, code2, code3, code4, opscategory]
+  wellbore:
+    file: per_table/wellbore.sql
+    columns: [idwell, idrec, des]
+  drillstring:
+    file: per_table/drillstring.sql
+    columns: [idwell, idrecparent, idrec, bitno, bittfa, com, des, stringno]
+  drillstring_comp:
+    file: per_table/drillstring_comp.sql
+    columns: [idwell, idrecparent, idrec, com, des, grade, hoursstart, joints, length, make, model, sysseq]
+  drillparam:
+    file: per_table/drillparam.sql
+    columns: [idwell, idrecparent, idrec, depthend, depthstart, dttmend, dttmstart, idrecwellbore]
+  formation:
+    file: per_table/formation.sql
+    columns: [idwell, idrecparent, idrec, depthdrillingbtm, depthdrillingtop, depthfinalsource, formname, layername]
+  # --- only used in `sql_join` mode ---------------------------------------------------
+  job_rig:
+    file: sql_join/job_rig.sql
+    columns: [idwell, idrec, jobtyp]
+  report_timelog:
+    file: sql_join/report_timelog.sql
+    columns: [idwell, idrecparent, idrec, dttmend, dttmstart, code1, code2, code3, code4, com, duration, idrecwellbore, opscategory, sysseq]
+    string_columns: [code1, code2, code3, code4, opscategory]
+  drillstring_joined:
+    file: sql_join/drillstring_joined.sql
+    columns: [idwell, idrecparent, idrec, bitno, com, des, com_DrillstringComp, des_DrillstringComp, sysseq]
+
+# Which datasets are fetched for each database in each mode.
+plans:
+  per_table: [well_header, job, rig, report, timelog, wellbore, drillstring, drillstring_comp, drillparam, formation]
+  sql_join: [well_header, job_rig, report_timelog, wellbore, drillstring_joined, drillparam, formation]

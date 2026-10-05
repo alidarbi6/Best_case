@@ -1,0 +1,26 @@
+SELECT
+    idwell,
+    idrecparent,
+    idrec,
+    depthend,
+    depthstart,
+    dttmend,
+    dttmstart,
+    hookloadoffbottom,
+    hookloadpickup,
+    hookloadrotating,
+    hookloadslackoff,
+    idrecwellbore,
+    liquidinjrate,
+    rpmmotor,
+    rpmstring,
+    sppdiff,
+    sppdrill,
+    tfo,
+    tmcirc,
+    tmdrill,
+    torquedrill,
+    torqueoffbtm,
+    wob
+FROM
+    dbo.wvt_wvjobdrillstringdrillparam;

@@ -1,0 +1,7 @@
+pandas>=2.0
+numpy
+pyyaml
+sqlalchemy>=2.0
+openpyxl
+pymssql
+pytest

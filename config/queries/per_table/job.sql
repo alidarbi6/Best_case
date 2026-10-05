@@ -1,0 +1,9 @@
+SELECT
+    idwell,
+    idrec,
+    dttmend,
+    dttmspud,
+    dttmstart,
+    jobtyp
+FROM
+    dbo.wvt_wvjob;

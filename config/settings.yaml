@@ -1,0 +1,114 @@
+# =====================================================================================
+#  Best-case workflow - main settings.  Paths are relative to this file.
+#  Secrets (DB password) are NEVER stored here: they are read from environment variables.
+# =====================================================================================
+
+source:
+  type: database            # database | csv_dir   (csv_dir is used for tests / offline runs)
+  csv_dir: ../data/raw      # layout: <csv_dir>/<database>/<dataset>.csv   (+ optional databases.csv)
+
+database:
+  url_template: "mssql+pymssql://{user}:{password}@{host}:{port}/{database}"
+  host: 10.120.114.4
+  port: 1433
+  user: sa
+  user_env: BEST_CASE_DB_USER          # if this env var is set it overrides `user`
+  password_env: BEST_CASE_DB_PASSWORD  # required for source.type = database
+  master_database: master
+  login_timeout: 30
+  on_database_error: raise  # raise | skip   (what to do when one database cannot be read)
+
+# Which databases are processed (workflow: Row Filter #380 on SELECT name FROM sys.databases)
+database_selection:
+  match: any
+  conditions:
+    - {column: name, operator: WILDCARD, value: "SPH*", case_sensitive: true}
+    - {column: name, operator: WILDCARD, value: "JR*", case_sensitive: true}
+    - {column: name, operator: WILDCARD, value: "drilled*", case_sensitive: false}
+
+queries:
+  file: queries/queries.yaml
+  mode: per_table           # per_table | sql_join
+
+files:
+  rules: rules.yaml
+  lookups: lookups.yaml
+
+# ------------------------------------------------------------------ pipeline parameters
+time_log:
+  duration_factor: 24       # DB durations are in days -> hours (Math Formula #451)
+  well_filter_column: wellname   # keep only wells of lookups.new_design_wells
+
+start_end:                  # sub-workflow "START / END": re-compute start & end time of day
+  enabled: true
+  sort_columns: [dttmstart_date, sysseq]
+  group_columns: [idwell, dttmstart_date]
+  duration_column: duration
+  full_day_hours: 24        # if the running total reaches this many hours ...
+  full_day_minus_minutes: 1 # ... end one minute earlier (stay inside the day)
+  minutes_to_int: round     # round | trunc  (Math Formula "convert to int")
+  cumulative: backward      # backward = running total from the first row of the day
+                            # forward  = total from this row to the last row of the day
+
+formation_stub_columns: [idwell, dttmend, dttmstart, wellname, dttmend_date, dttmstart_date, formname, form_seq]
+
+# Rows of the time log kept for the completed-hole-section logic (Row Filter #460)
+section_filter:
+  match: all
+  mode: matching
+  conditions:
+    - {column: code2, operator: EQ, value: P, case_sensitive: true}
+    - {column: code4, operator: NEQ, value: move, case_sensitive: false}
+    - {column: code4, operator: NEQ, value: completion, case_sensitive: false}
+
+completed_sections:         # sub-workflow "COMPLETED HO"
+  completion_code: completion
+  drop_columns: [depthstart, form_seq]   # removed from the time log when joined (Joiner #397)
+
+best_case:
+  approach_label: FOR_HS    # value of the `approach` column (Constant Value Column #234)
+  # Row filters that exist (switched OFF) in the KNIME workflow as test filters.
+  # Switch on by setting `enabled: true`; they are applied in the listed order to the
+  # best-case time log (after the join with the best sections).
+  post_filters:
+    - name: sph_category_only          # #673 (applied to the best sections)
+      stage: best_sections
+      enabled: false
+      conditions: [{column: category, operator: EQ, value: sph, case_sensitive: false}]
+    - name: wob_comment_only           # #677
+      stage: best_time_log
+      enabled: false
+      conditions: [{column: com, operator: WILDCARD, value: "*wob*", case_sensitive: false}]
+    - name: code4_17_only              # #678
+      stage: best_time_log
+      enabled: false
+      conditions: [{column: code4, operator: EQ, value: "17", case_sensitive: true}]
+    - name: single_well_test           # #680
+      stage: best_time_log
+      enabled: false
+      match: all
+      conditions:
+        - {column: wellname, operator: EQ, value: sph-15, case_sensitive: false}
+        - {column: code4, operator: EQ, value: "17", case_sensitive: true}
+        - {column: formname, operator: EQ, value: aghajari, case_sensitive: false}
+
+approaches:                 # sub-workflows "Approach 1/2/3" (results are side outputs in KNIME)
+  enabled: true
+  formation_column: formname
+  hours_to_days: 24         # Math Formula #414 (Sum(duration) / 24)
+  labels: {hs: HS, code1: Code1, opscat: OPSCAT}
+
+export:
+  directory: ../output
+  excel:
+    enabled: true
+    file: best_case.xlsx
+    sheet: best_case
+    date_columns_format: yyyy-mm-dd
+  # extra tables written as additional sheets/files for inspection
+  save_intermediate: true
+  intermediate_format: csv  # csv | none
+  approaches_sheet: approaches
+
+logging:
+  level: INFO

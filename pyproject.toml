@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "best-case"
+version = "0.1.0"
+description = "Drilling operations best-case workflow (Python port of the KNIME workflow)"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0",
+    "numpy",
+    "pyyaml",
+    "sqlalchemy>=2.0",
+    "openpyxl",
+]
+
+[project.optional-dependencies]
+mssql = ["pymssql"]
+test = ["pytest"]
+
+[project.scripts]
+best-case = "best_case.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
