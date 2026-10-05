@@ -53,7 +53,7 @@ def tables():
 
 
 def _cfg(settings_file, tmp_path, **kw):
-    cfg = Config.load(settings_file, ["source.type=csv_dir", f"export.directory={tmp_path}"])
+    cfg = Config.load(settings_file, ["source.type=csv_dir", "queries.mode=per_table", f"export.directory={tmp_path}"])
     return cfg.copy_with(**kw) if kw else cfg
 
 
@@ -83,20 +83,21 @@ def test_end_to_end_csv(settings_file, tmp_path, tables):
 
 def test_per_table_and_sql_join_modes_agree(settings_file, tmp_path, tables):
     results = {}
-    for mode in ("per_table", "sql_join"):
+    for mode in ("per_table", "sql_join", "sql_full"):
         cfg = _cfg(settings_file, tmp_path / mode, queries__mode=mode, source__type="database")
         registry = QueryRegistry(cfg.path("queries.file"))
         src = SqliteSource(cfg, registry, tables)
         ctx = run_pipeline(cfg, source=src)
         results[mode] = ctx
-    a, b = results["per_table"].tables, results["sql_join"].tables
-    for name in ("time_log_final", "best_case_result", "sections"):
-        cols = sorted(a[name].columns)
-        assert cols == sorted(b[name].columns), name
-        key = list(a[name].columns)
-        x = a[name][key].astype(str).sort_values(key).reset_index(drop=True)
-        y = b[name][key].astype(str).sort_values(key).reset_index(drop=True)
-        pd.testing.assert_frame_equal(x, y)
+    a = results["per_table"].tables
+    for other in ("sql_join", "sql_full"):
+        b = results[other].tables
+        for name in ("time_log_final", "best_case_result", "sections"):
+            assert sorted(a[name].columns) == sorted(b[name].columns), (other, name)
+            key = list(a[name].columns)
+            x = a[name][key].astype(str).sort_values(key).reset_index(drop=True)
+            y = b[name][key].astype(str).sort_values(key).reset_index(drop=True)
+            pd.testing.assert_frame_equal(x, y)
 
 
 def test_stage_selection_cache_and_override(settings_file, tmp_path, tables):

@@ -5,7 +5,10 @@
 #
 # Two interchangeable sets are provided (selected with `queries.mode` in settings.yaml):
 #   per_table : one SELECT per table, joins are done in pandas (what the KNIME workflow does)
-#   sql_join  : the join queries given in the specification document, joins done by SQL Server
+#   sql_join  : the join queries of the first specification version (job+rig, report+timelog,
+#               drillstring+components); the remaining joins are still done in pandas
+#   sql_full  : the consolidated queries of the current specification (one query per group:
+#               time log, drill data); everything is joined by SQL Server
 
 system:
   databases:
@@ -56,7 +59,20 @@ datasets:
     file: sql_join/drillstring_joined.sql
     columns: [idwell, idrecparent, idrec, bitno, com, des, com_DrillstringComp, des_DrillstringComp, sysseq]
 
+  # --- only used in `sql_full` mode ---------------------------------------------------
+  general_well_data:        # documented for completeness; its join is embedded in the two queries below
+    file: sql_full/general_well_data.sql
+    columns: [idwell, wellname, idrec, jobtyp]
+  time_log_full:
+    file: sql_full/time_log_full.sql
+    columns: [idwell, idrecparent, idrec, dttmend, dttmstart, code1, code2, code3, code4, com, duration, idrecwellbore, opscategory, sysseq, wellname, jobtyp, des]
+    string_columns: [code1, code2, code3, code4, opscategory]
+  drill_full:
+    file: sql_full/drill_full.sql
+    columns: [idwell, idrecparent, idrec, bitno, com, des, com_DrillstringComp, des_DrillstringComp, sysseq, depthend, depthstart, dttmend, dttmstart, wellname, jobtyp]
+
 # Which datasets are fetched for each database in each mode.
 plans:
   per_table: [well_header, job, rig, report, timelog, wellbore, drillstring, drillstring_comp, drillparam, formation]
   sql_join: [well_header, job_rig, report_timelog, wellbore, drillstring_joined, drillparam, formation]
+  sql_full: [time_log_full, drill_full, formation]

@@ -14,7 +14,8 @@ config/
     queries.yaml         فهرست کوئری‌ها + ستون‌های مورد انتظار هر کدام + برنامهٔ اجرا در هر حالت
     system/databases.sql
     per_table/*.sql      یک SELECT برای هر جدول (مثل ورک‌فلو؛ join در pandas)
-    sql_join/*.sql       کوئری‌های join سند (join در SQL Server)
+    sql_join/*.sql       کوئری‌های join نسخهٔ اول سند
+    sql_full/*.sql       کوئری‌های تجمیعی نسخهٔ جدید سند
 src/best_case/
   engine/                بلوک‌های عمومی معادل نودهای KNIME (Joiner, GroupBy, Duplicate Row Filter, Sorter, Rule Engine, ...)
   io/                    منبع داده (SQL Server / پوشهٔ CSV)، رجیستری کوئری
@@ -37,7 +38,7 @@ python -m best_case run --settings config/settings.yaml
 
 | دستور | کار |
 |---|---|
-| `--set queries.mode=sql_join` | استفاده از کوئری‌های join سند به‌جای join در pandas |
+| `--set queries.mode=per_table` | SELECT تک‌جدولی و join در pandas (رفتار ورک‌فلو) |
 | `--set source.type=csv_dir` | اجرا از روی فایل‌های CSV (بدون دیتابیس) |
 | `--only start_end --only sections` | فقط مراحل مشخص |
 | `--cache-dir .cache --from-stage sections` | ذخیرهٔ خروجی هر مرحله و ادامه از یک مرحله |
@@ -68,8 +69,9 @@ python -m best_case run --settings config/settings.yaml
 2. **افزودن/تعویض فایل**: در `queries.yaml` مقدار `file:` را عوض کنید.
 3. **حالت اجرا** (`queries.mode`):
    * `per_table` — ۱۰ SELECT جداگانه، joinها در pandas (رفتار ورک‌فلو).
-   * `sql_join` — سه کوئری join سند (`job_rig`, `report_timelog`, `drillstring_joined`) در SQL Server اجرا می‌شود.
-   هر دو حالت در تست‌ها نتیجهٔ یکسان می‌دهند (`tests/test_pipeline.py`).
+   * `sql_join` — سه کوئری join نسخهٔ اول سند (`job_rig`, `report_timelog`, `drillstring_joined`)؛ بقیهٔ joinها در pandas.
+   * `sql_full` (**پیش‌فرض**، نسخهٔ جدید سند) — دو کوئری تجمیعی `time_log_full` و `drill_full` (همه‌چیز شامل wellname/jobtyp/des در SQL Server) + `formation`. کوئری `general_well_data` سند هم در `sql_full/` هست ولی join آن داخل دو کوئری بالا آمده و جداگانه خوانده نمی‌شود.
+   هر سه حالت در تست‌ها نتیجهٔ یکسان می‌دهند (`tests/test_pipeline.py`). استخراج تاریخ/ساعت و ضرب `duration×24` همچنان در پایتون انجام می‌شود.
 4. نام دیتابیس‌ها در `database_selection` (الگوهای wildcard) تنظیم می‌شود؛ جدول‌ها داخل هر دیتابیس خوانده می‌شوند.
 
 ## تغییر قوانین پاک‌سازی

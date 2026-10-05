@@ -34,7 +34,10 @@ def assemble_general_well_data(d: dict[str, pd.DataFrame]) -> pd.DataFrame:
 
 def assemble_time_log(d: dict[str, pd.DataFrame], gwd: pd.DataFrame, cfg) -> pd.DataFrame:
     """§1.2: job report + time log + well name / job type + wellbore description."""
-    if "report_timelog" in d:
+    full = d.get("time_log_full")  # sql_full: names, job type and wellbore description come from SQL
+    if full is not None:
+        rt = full.copy()
+    elif "report_timelog" in d:
         rt = d["report_timelog"].copy()
     else:
         rt = join(
@@ -44,6 +47,9 @@ def assemble_time_log(d: dict[str, pd.DataFrame], gwd: pd.DataFrame, cfg) -> pd.
     rt["duration"] = rt["duration"] * float(cfg.get("time_log.duration_factor", 24))
     rt = remove_time(rt, ["dttmend", "dttmstart"], "_date")
     rt = remove_date(rt, ["dttmend", "dttmstart"], "_time")
+    if full is not None:
+        tail = ["wellname", "jobtyp", "des"]
+        return rt[[c for c in rt.columns if c not in tail] + tail]
     tl = join(
         rt, gwd, ["idwell", "idrecparent"], ["idwell", "idrec"], how="left",
         right_select=Select(include=["wellname", "jobtyp"]),
@@ -57,6 +63,8 @@ def assemble_time_log(d: dict[str, pd.DataFrame], gwd: pd.DataFrame, cfg) -> pd.
 
 def assemble_drill(d: dict[str, pd.DataFrame], gwd: pd.DataFrame) -> pd.DataFrame:
     """§1.3: drill string + components + drilling parameters (+ well name / job type)."""
+    if "drill_full" in d:  # sql_full: components, parameters, well name and job type already joined
+        return d["drill_full"]
     if "drillstring_joined" in d:
         ds = d["drillstring_joined"]
     else:
@@ -74,7 +82,7 @@ def assemble_drill(d: dict[str, pd.DataFrame], gwd: pd.DataFrame) -> pd.DataFram
 def extract_database(source, database: str, mode: str, cfg) -> dict[str, pd.DataFrame]:
     plan = source.registry.plan(mode)
     data = {name: source.read(database, name) for name in plan}
-    gwd = assemble_general_well_data(data)
+    gwd = None if "time_log_full" in data else assemble_general_well_data(data)
     return {
         "time_log": assemble_time_log(data, gwd, cfg),
         "drill": assemble_drill(data, gwd),

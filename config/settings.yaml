@@ -28,7 +28,7 @@ database_selection:
 
 queries:
   file: queries/queries.yaml
-  mode: per_table           # per_table | sql_join
+  mode: sql_full            # per_table | sql_join | sql_full
 
 files:
   rules: rules.yaml
