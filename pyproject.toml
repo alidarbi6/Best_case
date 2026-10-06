@@ -13,6 +13,7 @@ dependencies = [
     "pyyaml",
     "sqlalchemy>=2.0",
     "openpyxl",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]

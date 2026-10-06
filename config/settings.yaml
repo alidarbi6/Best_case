@@ -102,6 +102,23 @@ approaches:                 # sub-workflows "Approach 1/2/3" (results are side o
   hours_to_days: 24         # Math Formula #414 (Sum(duration) / 24)
   labels: {hs: HS, code1: Code1, opscat: OPSCAT}
 
+# Comparison report in the layout of the "Best Case Demo" presentation (slides 6-14).
+report:
+  enabled: true
+  directory: report            # inside export.directory
+  excel: true                  # best_case_report.xlsx: one sheet per slide + native Excel charts
+  excel_file: best_case_report.xlsx
+  png: true                    # PNG charts (needs matplotlib)
+  wells: []                    # restrict to these wells, e.g. [SPH-13, SPH-14, SPH-15]; empty = all wells with completed sections
+  hole_sections: ["24", "17", "12 1/4", "8 1/2"]   # as in the presentation; empty = every hole section
+  hours_per_day: 24
+  max_series: 8                # max. series in a clustered/stacked chart (extra wells/formations are dropped/folded)
+  ddr:                         # slide 13: which time-log comments are shown as "Drilling Parameters (DDRs)"
+    comment_pattern: "*param*" # wildcard on the `com` column; empty = all comments of the best-case rows
+    case_sensitive: false
+  parameters: []               # slide 14 parameter list; empty = the list used in the presentation
+  example: {}                  # slide 14 PNG example, e.g. {well: SPH-15, hole_section: "17", date: "2025-12-07"}
+
 export:
   directory: ../output
   excel:

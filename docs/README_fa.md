@@ -63,6 +63,34 @@ python -m best_case run --settings config/settings.yaml
 | approaches | `stages/approaches.py` | Approach 1/2/3 (#454 #456 #464) #374 #414 #383 | — (فقط در ورک‌فلو) |
 | export | `stages/export.py` | Excel Writer #687 | — |
 
+## گزارش مقایسه (هم‌قالب پاورپوینت «Best Case Demo»)
+
+مرحلهٔ `report` بعد از اجرای اصلی، در `output/report/` می‌سازد:
+
+* `best_case_report.xlsx` — هر شیت معادل یک اسلاید با **همان عنوان ستون‌ها** + نمودار واقعی اکسل:
+
+| شیت | اسلاید | ستون‌ها |
+|---|---|---|
+| `6 Approach I - Duration by Well` | ۶ | Hole Section، یک ستون برای هر چاه (روز) + نمودار |
+| `7 Approach I vs II` | ۷ | Hole Section, Approach I, Approach II + نمودار |
+| `8 Comparison` | ۸ | Hole Section, Approach I, Approach II, Approach Combination, ردیف Total |
+| `9 Duration - All Approaches` | ۹ | همان + نمودار |
+| `11 Duration by Formation` | ۱۱ | Hole Section, Well, Type, Formation, Duration (Days) |
+| `12 Min Duration by Formation` | ۱۲ | همان ستون‌ها |
+| `13 Drilling Parameters I` | ۱۳ | Hole Section, Well, Date, Formation, Duration (Hours), Drilling Parameters (DDRs) |
+| `14 Drilling Parameters II` | ۱۴ | Record, Hole Section, Well, Date, Formation, Parameter, Value |
+
+* تصاویر PNG: `slide06…`, `slide07…`, `slide09…`, `slide14_drilling_parameters.png` و سه نمودار اضافه
+  (`extra_heatmap_well_vs_section` نقشهٔ حرارتی همهٔ چاه‌ها × بخش‌ها، `extra_best_well_by_formation` سهم هر سازند در بهترین چاه هر بخش، `extra_min_by_well_type` مقایسهٔ JR و SPH).
+
+تعریف‌ها (اسلاید ۴): **Approach I** = کمینهٔ جمع کل مدت هر چاه در هر بخش؛ **Approach II** = جمع کمینهٔ هر فعالیت (`code1`) در هر بخش؛
+**Approach Combination** = کمتر از دو مقدار بالا. ستون‌های Best Case (New Design/Combination) اسلاید ۸ طبق توضیح شما از منبع دیگری است و ساخته نمی‌شود.
+
+تنظیمات در `settings.yaml` بخش `report:`: `wells` (فهرست چاه‌ها، پیش‌فرض همه)، `hole_sections` (پیش‌فرض 24, 17, 12 1/4, 8 1/2 مثل اسلایدها؛ خالی = همه)،
+`ddr.comment_pattern` (کدام توضیحات به‌عنوان DDR نشان داده شود؛ پیش‌فرض `*param*`)، `parameters` و `example` (اسلاید ۱۴).
+نمودار خوشه‌ای حداکثر `max_series` چاه را نشان می‌دهد؛ نقشهٔ حرارتی همیشه همهٔ چاه‌ها را دارد.
+غیرفعال کردن: `--set report.enabled=false`.
+
 ## تغییر کوئری‌ها
 
 1. **ویرایش یک کوئری**: فایل `.sql` مربوطه را عوض کنید. فقط شرط: نام ستون‌های خروجی همانی باشد که در `queries.yaml` زیر `columns:` آمده (در صورت تغییر نام از `AS` استفاده کنید). اگر ستونی کم باشد، برنامه دقیقاً می‌گوید کدام کوئری و کدام ستون.
@@ -108,7 +136,7 @@ pipeline:
 ## تست
 
 ```bash
-python -m pytest -q          # ۳۳ تست؛ نیازی به دیتابیس ندارد
+python -m pytest -q          # ۳۷ تست؛ نیازی به دیتابیس ندارد
 ```
 تست‌ها شامل: موتور قانون/عبارت، Joiner، GroupBy، Duplicate Row Filter، Sorter، هر مرحله، اجرای کامل روی داده ساختگی،
 و اجرای هر دو حالت کوئری روی SQLite با همان فایل‌های `.sql`.

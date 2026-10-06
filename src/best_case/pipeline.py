@@ -14,7 +14,7 @@ from pathlib import Path
 from .config import Config
 from .io.queries import QueryRegistry
 from .io.sources import DataSource, build_source
-from .stages import (approaches, best_case, export, extract, formation_split, formations, merge_time_log,
+from .stages import (report, approaches, best_case, export, extract, formation_split, formations, merge_time_log,
                      sections, start_end, time_log, drilling_parameters)
 from .stages.base import Context, Stage
 
@@ -41,6 +41,9 @@ STAGES: list[Stage] = [
           ("best_sections", "best_time_log", "best_case_result"), "Best case per section/formation and result (§2)"),
     Stage("approaches", approaches.run, ("sections",), ("approaches",),
           "Alternative approaches HS / Code1 / OPSCAT", optional_flag="approaches.enabled"),
+    Stage("report", report.run, ("sections", "best_sections", "best_time_log", "best_case_result"), (),
+          "Comparison report in the layout of the presentation (tables, Excel charts, PNG charts)",
+          optional_flag="report.enabled"),
     Stage("export", export.run, ("best_case_result",), (), "Write Excel / CSV"),
 ]
 
