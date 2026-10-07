@@ -25,6 +25,13 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("stages", help="list the pipeline stages")
 
+    cmp_ = sub.add_parser("compare", help="compare a table with a KNIME reference (xlsx/csv)")
+    cmp_.add_argument("--reference", required=True)
+    cmp_.add_argument("--ours", default="output/intermediate/section_sums.csv")
+    cmp_.add_argument("--keys", default="code4,wellname,formname,category")
+    cmp_.add_argument("--values", default="Sum(duration)")
+    cmp_.add_argument("--tol", type=float, default=1e-6)
+
     demo = sub.add_parser("demo-data", help="write a synthetic CSV data set (no database needed)")
     demo.add_argument("--out", default="data/raw", type=Path)
     demo.add_argument("--seed", type=int, default=7)
@@ -34,6 +41,12 @@ def main(argv: list[str] | None = None) -> int:
         for s in STAGES:
             print(f"{s.name:22s} {s.description}")
         return 0
+    if args.cmd == "compare":
+        from .compare import compare_tables, load, report
+
+        res = compare_tables(load(args.reference), load(args.ours), args.keys.split(","), args.values.split(","), args.tol)
+        print(report(res))
+        return 0 if res["matched"] == res["n_reference"] == res["n_ours"] else 1
     if args.cmd == "demo-data":
         from .testing.synthetic import write_csv_dataset
 

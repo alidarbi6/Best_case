@@ -38,7 +38,7 @@ STAGES: list[Stage] = [
     Stage("sections", sections.run, ("time_log_final",), ("sections",),
           "Completed hole sections + category (§2)"),
     Stage("best_case", best_case.run, ("sections", "time_log_final", "drill_formations"),
-          ("best_sections", "best_time_log", "best_case_result"), "Best case per section/formation and result (§2)"),
+          ("section_sums", "best_sections", "best_time_log", "best_case_result"), "Best case per section/formation and result (§2)"),
     Stage("approaches", approaches.run, ("sections",), ("approaches",),
           "Alternative approaches HS / Code1 / OPSCAT", optional_flag="approaches.enabled"),
     Stage("report", report.run, ("sections", "best_sections", "best_time_log", "best_case_result"), (),

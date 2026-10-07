@@ -62,3 +62,13 @@ def test_pipeline_writes_report_files(settings_file, tmp_path):
 
     wb = load_workbook(rep / "best_case_report.xlsx")
     assert len(wb["6 Approach I - Duration by Well"]._charts) == 1  # native Excel chart
+
+
+def test_compare_tables_detects_differences_and_ignores_type_noise():
+    from best_case.compare import compare_tables
+
+    ref = pd.DataFrame({"code4": ["17", "24"], "wellname": ["A", "B"], "Sum(duration)": [10.0, 5.0]})
+    ours = pd.DataFrame({"code4": [17, 24, 32], "wellname": ["A", "B", "C"], "Sum(duration)": [10.0, 5.5, 1.0]})
+    res = compare_tables(ref, ours, ["code4", "wellname"], ["Sum(duration)"])
+    assert res["matched"] == 1 and len(res["value_differences"]) == 1 and len(res["only_in_ours"]) == 1
+    assert len(res["only_in_reference"]) == 0

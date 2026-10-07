@@ -91,6 +91,14 @@ python -m best_case run --settings config/settings.yaml
 نمودار خوشه‌ای حداکثر `max_series` چاه را نشان می‌دهد؛ نقشهٔ حرارتی همیشه همهٔ چاه‌ها را دارد.
 غیرفعال کردن: `--set report.enabled=false`.
 
+## مقایسه با خروجی KNIME
+
+```bash
+python -m best_case compare --reference data_validation.xlsx --ours output/intermediate/section_sums.csv
+```
+جدول `section_sums.csv` (مجموع مدت به ساعت برای code4/wellname/formname/category، معادل خروجی نود #186) بعد از هر اجرا ساخته می‌شود.
+کلیدها و ستون‌های مقایسه با `--keys` و `--values` قابل تغییرند.
+
 ## تغییر کوئری‌ها
 
 1. **ویرایش یک کوئری**: فایل `.sql` مربوطه را عوض کنید. فقط شرط: نام ستون‌های خروجی همانی باشد که در `queries.yaml` زیر `columns:` آمده (در صورت تغییر نام از `AS` استفاده کنید). اگر ستونی کم باشد، برنامه دقیقاً می‌گوید کدام کوئری و کدام ستون.

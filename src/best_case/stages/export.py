@@ -11,7 +11,7 @@ from .base import Context
 log = logging.getLogger("best_case")
 
 _INTERMEDIATE = [
-    "time_log_final", "sections", "best_sections", "best_time_log", "drill_params",
+    "time_log_final", "sections", "section_sums", "best_sections", "best_time_log", "drill_params",
     "formation_depths", "drill_formations", "approaches",
 ]
 

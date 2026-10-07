@@ -16,10 +16,15 @@ from .base import Context
 log = logging.getLogger("best_case")
 
 
-def best_sections(sections: pd.DataFrame, cfg) -> pd.DataFrame:
-    sums = group_by(
+def section_sums(sections: pd.DataFrame) -> pd.DataFrame:
+    """Total duration (hours) per hole section / well / formation / category (node #186 output)."""
+    return group_by(
         sections, ["code4", "wellname", "formname", "category"], [Agg("duration", "Sum")], name_policy="method"
     )
+
+
+def best_sections(sections: pd.DataFrame, cfg) -> pd.DataFrame:
+    sums = section_sums(sections)
     best = duplicate_row_filter(
         sums, ["code4", "formname", "category"], reference="Sum(duration)", selection="MINIMUM"
     )
@@ -53,6 +58,7 @@ def best_case_result(drill_formations: pd.DataFrame, best_tl: pd.DataFrame) -> p
 
 def run(ctx: Context) -> None:
     sections, time_log, drill_formations = ctx.need("sections", "time_log_final", "drill_formations")
+    ctx.tables["section_sums"] = section_sums(sections)
     best = best_sections(sections, ctx.cfg)
     best_tl = best_case_time_log(time_log, best, ctx.cfg)
     ctx.tables["best_sections"] = best
